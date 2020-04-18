@@ -13,9 +13,9 @@ export class AppComponent {
 
   gameIsRunning = false;
   gameBoard;
-  gameBoardWidth = 30;
-  gameBoardHeight = 30;
-  cellSize = 5;
+  gameBoardWidth = 25;
+  gameBoardHeight = 25;
+  cellSize = 20;
   CellColorConst = CellColorConst;
   snake: any[];
   food;
@@ -65,7 +65,7 @@ export class AppComponent {
       this.gameIsRunning = true;
       while (this.gameIsRunning) {
         await this.moveSnake();
-        await this.wait(50);
+        // await this.wait(50);
       }
     }
   }
@@ -81,6 +81,7 @@ export class AppComponent {
   async moveSnake(userMove?) {
     let move;
     let lastMove = this.snake[this.snake.length - 1];
+    let predictions;
     switch (this.gameMode) {
       case 'normal':
         if (userMove !== undefined) {
@@ -93,14 +94,14 @@ export class AppComponent {
         move = Math.round(Math.random() * 4);
         break;
       case 'ann':
-        move = await this.annService.getPrediction(
+        predictions = await this.annService.getPredictions(
           this.iSExistInGameBoard(lastMove.x, lastMove.y - 1) ? this.gameBoard[lastMove.y - 1][lastMove.x] : CellValueEnum.Snake,
           this.iSExistInGameBoard(lastMove.y, lastMove.y + 1) ? this.gameBoard[lastMove.y + 1][lastMove.x] : CellValueEnum.Snake,
           this.iSExistInGameBoard(lastMove.x - 1, lastMove.y) ? this.gameBoard[lastMove.y][lastMove.x - 1] : CellValueEnum.Snake,
           this.iSExistInGameBoard(lastMove.x + 1, lastMove.y) ? this.gameBoard[lastMove.y][lastMove.x + 1] : CellValueEnum.Snake,
-          this.food.x,
-          this.food.y
         );
+        console.log('predictions', predictions);
+        move = predictions.indexOf(Math.max(...predictions));
         break;
     }
     const lastMoveDirection = this.getLastMoveDirection();
@@ -183,35 +184,33 @@ export class AppComponent {
       if (this.gameMode === 'ann') {
         await this.annService.fit(
           this.iSExistInGameBoard(lastMove.x, lastMove.y - 1) ? this.gameBoard[lastMove.y - 1][lastMove.x] : CellValueEnum.Snake,
-          this.iSExistInGameBoard(lastMove.y, lastMove.y + 1) ? this.gameBoard[lastMove.y + 1][lastMove.x] : CellValueEnum.Snake,
+          this.iSExistInGameBoard(lastMove.x, lastMove.y + 1) ? this.gameBoard[lastMove.y + 1][lastMove.x] : CellValueEnum.Snake,
           this.iSExistInGameBoard(lastMove.x - 1, lastMove.y) ? this.gameBoard[lastMove.y][lastMove.x - 1] : CellValueEnum.Snake,
           this.iSExistInGameBoard(lastMove.x + 1, lastMove.y) ? this.gameBoard[lastMove.y][lastMove.x + 1] : CellValueEnum.Snake,
-          this.food.x,
-          this.food.y,
-          move === MoveEnum.Up ? -1 : 0,
-          move === MoveEnum.Down ? -1 : 0,
-          move === MoveEnum.Left ? -1 : 0,
-          move === MoveEnum.Right ? -1 : 0,
+          move === MoveEnum.Up ? -1 : predictions[0],
+          move === MoveEnum.Down ? -1 : predictions[1],
+          move === MoveEnum.Left ? -1 : predictions[2],
+          move === MoveEnum.Right ? -1 : predictions[3],
         );
       }
       this.gameIsRunning = false;
-      alert('You lose');
       this.resetGame();
+      setTimeout(() => {
+        this.play('ann');
+      }, 1000);
     } else {
       // Check if eat
       if (lastMove.x === this.food.x && lastMove.y === this.food.y) {
         if (this.gameMode === 'ann') {
           await this.annService.fit(
             this.iSExistInGameBoard(lastMove.x, lastMove.y - 1) ? this.gameBoard[lastMove.y - 1][lastMove.x] : CellValueEnum.Snake,
-            this.iSExistInGameBoard(lastMove.y, lastMove.y + 1) ? this.gameBoard[lastMove.y + 1][lastMove.x] : CellValueEnum.Snake,
+            this.iSExistInGameBoard(lastMove.x, lastMove.y + 1) ? this.gameBoard[lastMove.y + 1][lastMove.x] : CellValueEnum.Snake,
             this.iSExistInGameBoard(lastMove.x - 1, lastMove.y) ? this.gameBoard[lastMove.y][lastMove.x - 1] : CellValueEnum.Snake,
             this.iSExistInGameBoard(lastMove.x + 1, lastMove.y) ? this.gameBoard[lastMove.y][lastMove.x + 1] : CellValueEnum.Snake,
-            this.food.x,
-            this.food.y,
-            move === MoveEnum.Up ? 1 : 0,
-            move === MoveEnum.Down ? 1 : 0,
-            move === MoveEnum.Left ? 1 : 0,
-            move === MoveEnum.Right ? 1 : 0,
+            move === MoveEnum.Up ? 1 : predictions[0],
+            move === MoveEnum.Down ? 1 : predictions[1],
+            move === MoveEnum.Left ? 1 : predictions[2],
+            move === MoveEnum.Right ? 1 : predictions[3],
           );
         }
         this.generateFood();
@@ -221,15 +220,13 @@ export class AppComponent {
         if (this.gameMode === 'ann') {
           await this.annService.fit(
             this.iSExistInGameBoard(lastMove.x, lastMove.y - 1) ? this.gameBoard[lastMove.y - 1][lastMove.x] : CellValueEnum.Snake,
-            this.iSExistInGameBoard(lastMove.y, lastMove.y + 1) ? this.gameBoard[lastMove.y + 1][lastMove.x] : CellValueEnum.Snake,
+            this.iSExistInGameBoard(lastMove.x, lastMove.y + 1) ? this.gameBoard[lastMove.y + 1][lastMove.x] : CellValueEnum.Snake,
             this.iSExistInGameBoard(lastMove.x - 1, lastMove.y) ? this.gameBoard[lastMove.y][lastMove.x - 1] : CellValueEnum.Snake,
             this.iSExistInGameBoard(lastMove.x + 1, lastMove.y) ? this.gameBoard[lastMove.y][lastMove.x + 1] : CellValueEnum.Snake,
-            this.food.x,
-            this.food.y,
-            0,
-            0,
-            0,
-            0,
+            (this.food.y === lastMove.y) ? 0 : ((this.food.y < lastMove.y) ? 1 : -1),
+            (this.food.y === lastMove.y) ? 0 : ((this.food.y > lastMove.y) ? 1 : -1),
+            (this.food.x === lastMove.x) ? 0 : ((this.food.x < lastMove.x) ? 1 : -1),
+            (this.food.x === lastMove.x) ? 0 : ((this.food.x > lastMove.x) ? 1 : -1),
           );
         }
         // Draw the move on the board

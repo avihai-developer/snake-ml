@@ -12,23 +12,20 @@ export class AnnService {
 
   createModel() {
     this.model = tf.sequential();
-    this.model.add(tf.layers.dense({units: 12, inputShape: [6]}));
-    this.model.add(tf.layers.dense({units: 12, inputShape: [12]}));
-    this.model.add(tf.layers.dense({units: 4, inputShape: [12]}));
-    this.model.compile({loss: 'meanSquaredError', optimizer: 'sgd'});
+    this.model.add(tf.layers.dense({units: 16, inputShape: [4]}));
+    this.model.add(tf.layers.dense({units: 16, inputShape: [16]}));
+    this.model.add(tf.layers.dense({units: 4, inputShape: [16]}));
+    this.model.compile({loss: 'meanSquaredError', optimizer: tf.train.sgd(0.01)});
   }
 
-  async fit(aboveHead, belowHead, leftHead, rightHead, foodX, foodY, scoreUp, scoreDown, scoreLeft, scoreRight) {
-    console.log('fit');
-    const inputData = tf.tensor2d([[aboveHead, belowHead, leftHead, rightHead, foodX, foodY]], [1, 6]);
+  async fit(aboveHead, belowHead, leftHead, rightHead, scoreUp, scoreDown, scoreLeft, scoreRight) {
+    const inputData = tf.tensor2d([[aboveHead, belowHead, leftHead, rightHead]], [1, 4]);
     const outputData = tf.tensor2d([[scoreUp, scoreDown, scoreLeft, scoreRight]], [1, 4]);
-    await this.model.fit(inputData, outputData);
+    await this.model.fit(inputData, outputData, {epochs: 25});
   }
 
-  async getPrediction(aboveHead, belowHead, leftHead, rightHead, foodX, foodY) {
-    const prediction = await this.model.predict(tf.tensor2d([[aboveHead, belowHead, leftHead, rightHead, foodX, foodY]], [1, 6])).dataSync();
-    console.log('prediction', prediction);
-    return prediction.indexOf(Math.max(...prediction));
+  async getPredictions(aboveHead, belowHead, leftHead, rightHead) {
+    return this.model.predict(tf.tensor2d([[aboveHead, belowHead, leftHead, rightHead]], [1, 4])).dataSync();
   }
 
 }
