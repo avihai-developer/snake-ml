@@ -205,6 +205,9 @@ export class AppComponent {
       // Check if eat
       if (lastMove.x === this.food.x && lastMove.y === this.food.y) {
         if (this.gameMode === 'ann') {
+          if (continueMove) {
+            move = lastMoveDirection;
+          }
           await this.annService.fit(
             this.iSExistInGameBoard(lastMove.x, lastMove.y - 1) ? this.gameBoard[lastMove.y - 1][lastMove.x] : CellValueEnum.Snake,
             this.iSExistInGameBoard(lastMove.x, lastMove.y + 1) ? this.gameBoard[lastMove.y + 1][lastMove.x] : CellValueEnum.Snake,
