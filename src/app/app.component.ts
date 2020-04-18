@@ -182,6 +182,9 @@ export class AppComponent {
     lastMove = this.snake[this.snake.length - 1];
     if (this.isLose()) {
       if (this.gameMode === 'ann') {
+        if (continueMove) {
+          move = lastMoveDirection;
+        }
         await this.annService.fit(
           this.iSExistInGameBoard(lastMove.x, lastMove.y - 1) ? this.gameBoard[lastMove.y - 1][lastMove.x] : CellValueEnum.Snake,
           this.iSExistInGameBoard(lastMove.x, lastMove.y + 1) ? this.gameBoard[lastMove.y + 1][lastMove.x] : CellValueEnum.Snake,
