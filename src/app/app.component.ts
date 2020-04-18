@@ -184,9 +184,6 @@ export class AppComponent {
     lastMove = this.snake[this.snake.length - 1];
     if (this.isLose()) {
       if (this.gameMode === 'ann') {
-        if (continueMove) {
-          move = lastMoveDirection;
-        }
         await this.annService.fit(
           this.iSExistInGameBoard(lastMove.x, lastMove.y - 1) ? this.gameBoard[lastMove.y - 1][lastMove.x] : CellValueEnum.Snake,
           this.iSExistInGameBoard(lastMove.x, lastMove.y + 1) ? this.gameBoard[lastMove.y + 1][lastMove.x] : CellValueEnum.Snake,
@@ -209,9 +206,6 @@ export class AppComponent {
       // Check if eat
       if (lastMove.x === this.food.x && lastMove.y === this.food.y) {
         if (this.gameMode === 'ann') {
-          if (continueMove) {
-            move = lastMoveDirection;
-          }
           await this.annService.fit(
             this.iSExistInGameBoard(lastMove.x, lastMove.y - 1) ? this.gameBoard[lastMove.y - 1][lastMove.x] : CellValueEnum.Snake,
             this.iSExistInGameBoard(lastMove.x, lastMove.y + 1) ? this.gameBoard[lastMove.y + 1][lastMove.x] : CellValueEnum.Snake,
@@ -233,10 +227,10 @@ export class AppComponent {
             this.iSExistInGameBoard(lastMove.x, lastMove.y + 1) ? this.gameBoard[lastMove.y + 1][lastMove.x] : CellValueEnum.Snake,
             this.iSExistInGameBoard(lastMove.x - 1, lastMove.y) ? this.gameBoard[lastMove.y][lastMove.x - 1] : CellValueEnum.Snake,
             this.iSExistInGameBoard(lastMove.x + 1, lastMove.y) ? this.gameBoard[lastMove.y][lastMove.x + 1] : CellValueEnum.Snake,
-            (this.food.y === lastMove.y) ? 0 : ((this.food.y < lastMove.y) ? 1 : -1),
-            (this.food.y === lastMove.y) ? 0 : ((this.food.y > lastMove.y) ? 1 : -1),
-            (this.food.x === lastMove.x) ? 0 : ((this.food.x < lastMove.x) ? 1 : -1),
-            (this.food.x === lastMove.x) ? 0 : ((this.food.x > lastMove.x) ? 1 : -1),
+            (this.food.y === lastMove.y) ? predictions[0] : ((this.food.y < lastMove.y) ? 0.5 : -0.5),
+            (this.food.y === lastMove.y) ? predictions[1] : ((this.food.y > lastMove.y) ? 0.5 : -0.5),
+            (this.food.x === lastMove.x) ? predictions[2] : ((this.food.x < lastMove.x) ? 0.5 : -0.5),
+            (this.food.x === lastMove.x) ? predictions[3] : ((this.food.x > lastMove.x) ? 0.5 : -0.5),
           );
         }
         // Draw the move on the board
