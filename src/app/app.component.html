@@ -1,6 +1,7 @@
 <h1>
   snake-ml
 </h1>
+<h2>Score: {{snake.length - 3}}</h2>
 <svg class="game-board"
      [style.width]="gameBoardWidth * cellSize"
      [style.height]="gameBoardHeight * cellSize">
@@ -17,6 +18,14 @@
   </g>
 </svg>
 <button class="play-button"
-        (click)="play()">
+        (click)="play('normal')">
   Play
+</button>
+<button class="play-button"
+        (click)="play('random')">
+  Play Random
+</button>
+<button class="play-button"
+        (click)="play('ann')">
+  Play ANN
 </button>
