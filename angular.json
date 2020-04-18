@@ -123,6 +123,10 @@
           }
         }
       }
-    }},
-  "defaultProject": "snake-ml"
+    }
+  },
+  "defaultProject": "snake-ml",
+  "cli": {
+    "analytics": "601e9d76-4c9c-4b96-a70f-d823ae1e88c6"
+  }
 }
