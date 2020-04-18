@@ -65,7 +65,9 @@ export class AppComponent {
       this.gameIsRunning = true;
       while (this.gameIsRunning) {
         await this.moveSnake();
-        // await this.wait(50);
+        if (this.gameMode === 'normal' || this.gameMode === 'random') {
+          await this.wait(50);
+        }
       }
     }
   }
@@ -198,9 +200,11 @@ export class AppComponent {
       }
       this.gameIsRunning = false;
       this.resetGame();
-      setTimeout(() => {
-        this.play('ann');
-      }, 1000);
+      if (this.gameMode === 'ann') {
+        setTimeout(() => {
+          this.play('ann');
+        }, 1000);
+      }
     } else {
       // Check if eat
       if (lastMove.x === this.food.x && lastMove.y === this.food.y) {
